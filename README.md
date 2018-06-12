@@ -1,6 +1,6 @@
 # AutoTile Generator
 
-This is a 3x3 autotile tilemap generator using only 5 tiles.
+Assemble 3x3 bitmask tileset using a smaller template.
 
 From this:  
 ![template](https://i.imgur.com/QiyhVhm.png)  
@@ -12,20 +12,46 @@ Or from this:
 To this:  
 ![result](https://i.imgur.com/3mxv01p.png)
 
-The generator automatically detects template rows as variations and generate another set of tiles in the same result
+The generator is fully customizable and automatically detects template rows as variations and generate another set of tiles in the same result.
 
 ## Requirements
 * [Python 3.x](https://www.python.org/downloads/)
 * [Python Pillow library](https://pillow.readthedocs.io/en/5.1.x/installation.html) (pip install pillow)
+* [Python jstyleson library](https://github.com/linjackson78/jstyleson) (pip install jstyleson)
 
 ## Usage
 
-Before you do anything you need to setup your art, the template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the minitile sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
+Before you do anything you need to setup your art, the template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the default template sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
 
-Open a console inside the directory and run the `autotile_generator.py` python script with this format `python autotile_generator.py input_image.png output_image.png` where output_image.png is optional.
+Open a console inside the directory and run the `autotile_generator.py` python script with this format `python autotile_generator.py -i "input_image.png" -m "input_map.json" -d "output_image.png"`.
 
 Example:
-`python autotile_generator.py template.png result.png`
+`python autotile_generator.py -i "jungle.png"`
+`python autotile_generator.py -i "cave.png" -d "cave_autotile.png"`
+`python autotile_generator.py -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+
+Don't forget to use Quotation marks around your paths for space filename support.
+
+### Command list:
+`-i --input`: The input image, if not found looks for template.png in the same directory.
+`-m --input_map`: The input mapping, if not found looks for default_input_map.json in the same directory.
+	Maps input tilesets to the generated autotile result image. 
+	Each tile in the result map is represented by 4 values: (number_1, number_2, number_3, number_4)
+	Where 0 represents an empty tile and a number bigger than 0 represents the tile in input tile, for example 1 is the first tile in input tile.
+	Tiles in result are constructed using each of the four values:
+		number_1 , number_2
+		number_3 , number_4
+	For example a tile represented by those values (0,1,0,1) result in:
+		top_left_corner_from_0_input_tile,	top_right_corner_from_1_input_tile
+		bot_left_corner_from_1_input_tile,	bot_right_corner_from_0_input_tile
+	The map json is composed by many tiles, for example:
+		[2,3,0,1],[3,3,1,0],[4,3,2,0]
+		[4,4,1,1],[2,2,4,0],[4,4,4,4]
+	Result in an autotile image with 6 tiles
+	Another important value from json map is the Input Size, which is how many tiles conform the first row from input image, 
+	if last example used a input image with 4 tiles, this value should be 4. The template image uses 5 tiles.
+`-d --destination`: The output image destination, if not set, generates result.png in the same directory.
+`-h --help`: show help.
 
 **Usage in Godot**
 
@@ -40,6 +66,7 @@ CC-0
 Based in https://github.com/lunarfyre7/GodotAutotileAssembler/ from https://github.com/lunarfyre7
 
 Main Differences:
-* Doesn't require Gimp
-* Instant tile generation
-* Variation Support
+* Fully customizable (see input_map command in Command_List).
+* Variation Support.
+* Doesn't require Gimp.
+* Instant tile generation.
