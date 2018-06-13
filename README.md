@@ -26,31 +26,48 @@ Before you do anything you need to setup your art, the template is actually 20 t
 Open a console inside the directory and run the `autotile_generator.py` python script with this format `python autotile_generator.py -i "input_image.png" -m "input_map.json" -d "output_image.png"`.
 
 Example:
+
 `python autotile_generator.py -i "jungle.png"`
+
 `python autotile_generator.py -i "cave.png" -d "cave_autotile.png"`
+
 `python autotile_generator.py -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+
 
 Don't forget to use Quotation marks around your paths for space filename support.
 
 ### Command list:
 `-i --input`: The input image, if not found looks for template.png in the same directory.
+
 `-m --input_map`: The input mapping, if not found looks for default_input_map.json in the same directory.
-	Maps input tilesets to the generated autotile result image. 
-	Each tile in the result map is represented by 4 values: (number_1, number_2, number_3, number_4)
-	Where 0 represents an empty tile and a number bigger than 0 represents the tile in input tile, for example 1 is the first tile in input tile.
-	Tiles in result are constructed using each of the four values:
-		number_1 , number_2
-		number_3 , number_4
-	For example a tile represented by those values (0,1,0,1) result in:
-		top_left_corner_from_0_input_tile,	top_right_corner_from_1_input_tile
-		bot_left_corner_from_1_input_tile,	bot_right_corner_from_0_input_tile
-	The map json is composed by many tiles, for example:
-		[2,3,0,1],[3,3,1,0],[4,3,2,0]
-		[4,4,1,1],[2,2,4,0],[4,4,4,4]
-	Result in an autotile image with 6 tiles
-	Another important value from json map is the Input Size, which is how many tiles conform the first row from input image, 
-	if last example used a input image with 4 tiles, this value should be 4. The template image uses 5 tiles.
+
+Maps input tilesets to the generated autotile result image. 
+
+Each tile in the result map is represented by 4 values: (number_1, number_2, number_3, number_4)
+
+Where 0 represents an empty tile and a number bigger than 0 represents the tile in input tile, for example 1is the first tile in input tile.
+
+Tiles in result are constructed using each of the four values:
+```
+number_1 , number_2
+number_3 , number_4
+```
+For example a tile represented by those values (0,1,0,1) result in:
+```
+top_left_corner_from_0_input_tile, top_right_corner_from_1_input_tile
+bot_left_corner_from_1_input_tile, bot_right_corner_from_0_input_tile
+```
+The map json is composed by many tiles, for example:
+```
+[2,3,0,1],[3,3,1,0],[4,3,2,0]
+[4,4,1,1],[2,2,4,0],[4,4,4,4]
+```
+Result in an autotile image with 6 tiles.
+
+Another important value from json map is the Input Size, which is how many tiles conform the first row from input image, if last example used a input image with 4 tiles, this value should be 4. The template image uses 5 tiles.
+
 `-d --destination`: The output image destination, if not set, generates result.png in the same directory.
+
 `-h --help`: show help.
 
 **Usage in Godot**
