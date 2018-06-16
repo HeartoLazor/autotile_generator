@@ -39,10 +39,12 @@ import sys
 import math
 import json
 import jstyleson
+import pkg_resources
 from PIL import Image, ImageDraw
 
 DEFAULT_INPUT_NAME = "template.png"
-DEFAULT_INPUT_MAP_NAME = "default_input_map.json"
+# DEFAULT_INPUT_MAP_NAME = "default_input_map.json"
+DEFAULT_INPUT_MAP_NAME = pkg_resources.resource_filename('autotile_generator', 'default_input_map.json')
 DEFAULT_DEST_NAME = "result.png"
 
 COMMAND_INPUT = ["-i","--input","-input"]
