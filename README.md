@@ -66,9 +66,13 @@ Result in an autotile image with 6 tiles.
 
 Another important value from json map is the Input Size, which is how many tiles conform the first row from input image, if last example used a input image with 4 tiles, this value should be 4. The template image uses 5 tiles.
 
-`-d --destination`: The output image destination, if not set, generates result.png in the same directory.
+`-d --destination`: The output image destination, if not set the output is <inputfile>_autotile.png in the same directory as the input.
 
 `-h --help`: show help.
+
+###installation
+
+Simply run `sudo pip install .` from the root directory to install this package. Then you can invoke it anywhere like this `python -m autotile_generator -i <image>`.
 
 **Usage in Godot**
 

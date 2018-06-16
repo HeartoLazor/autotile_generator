@@ -40,12 +40,13 @@ import math
 import json
 import jstyleson
 import pkg_resources
+import re
 from PIL import Image, ImageDraw
 
 DEFAULT_INPUT_NAME = "template.png"
 # DEFAULT_INPUT_MAP_NAME = "default_input_map.json"
 DEFAULT_INPUT_MAP_NAME = pkg_resources.resource_filename('autotile_generator', 'default_input_map.json')
-DEFAULT_DEST_NAME = "result.png"
+DEFAULT_DEST_SUFFIX = "_autotile.png"
 
 COMMAND_INPUT = ["-i","--input","-input"]
 COMMAND_INPUT_MAP = ["-m","--input_map","-input_map"]
@@ -242,7 +243,7 @@ def main():
 			result = read_command_value(result, sys.argv)
 			if(result != None):
 				input_map_path = result
-		destination_path = DEFAULT_DEST_NAME
+		destination_path = re.sub(r'(.jpg|.png|.tiff|.tif|.gif)$', '', input_path, re.IGNORECASE) + DEFAULT_DEST_SUFFIX
 		#search destination
 		result = read_command(COMMAND_RESULT_PATH, sys.argv)
 		if(result != -1):
