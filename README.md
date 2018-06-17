@@ -15,6 +15,7 @@ To this:
 The generator is fully customizable and automatically detects template rows as variations and generate another set of tiles in the same result.
 
 ## Requirements
+
 * [Python 3.x](https://www.python.org/downloads/)
 * [Python Pillow library](https://pillow.readthedocs.io/en/5.1.x/installation.html) (pip install pillow)
 * [Python jstyleson library](https://github.com/linjackson78/jstyleson) (pip install jstyleson)
@@ -27,19 +28,26 @@ Open a console inside the directory and run the `autotile_generator.py` python s
 
 Example:
 
-`python autotile_generator.py -i "jungle.png"`
+`python -m autotile_generator -s "jungle.png"`
 
-`python autotile_generator.py -i "cave.png" -d "cave_autotile.png"`
+`python -m autotile_generator -s "cave.png" -d "cave_autotile.png"`
 
-`python autotile_generator.py -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+`python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
 
 
 Don't forget to use Quotation marks around your paths for space filename support.
 
-### Command list:
-`-i --input`: The input image, if not found looks for template.png in the same directory.
+## Command list:
 
-`-m --input_map`: The input mapping, if not found looks for default_input_map.json in the same directory.
+`-s, --source or --source_image`: The input image, if not found looks for template.png in the same directory.
+
+Example:
+`python -m autotile_generator -s "jungle.png"`
+
+`-i --input_map`: The input mapping, if not found uses default installed map (default_input_map.json).
+
+Example:
+`python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
 
 Maps input tilesets to the generated autotile result image. 
 
@@ -68,11 +76,21 @@ Another important value from json map is the Input Size, which is how many tiles
 
 `-d --destination`: The output image destination, if not set the output is <inputfile>_autotile.png in the same directory as the input.
 
+Example:
+`python -m autotile_generator -s "cave.png" -d "cave_autotile.png"`
+
 `-h --help`: show help.
 
-###installation
+Example:
+`python -m autotile_generator -h`
 
-Simply run `sudo pip install .` from the root directory to install this package. Then you can invoke it anywhere like this `python -m autotile_generator -i <image>`.
+## Installation
+
+Simply run `pip install .` from the root directory to install this package, don't forget administrator privileges. Then you can invoke it anywhere like this `python -m autotile_generator -i <image>`.
+
+## Uninstall
+
+Run with administrator privileges `pip uninstall autotile_generator`
 
 **Usage in Godot**
 
@@ -81,7 +99,8 @@ Here is an Reference for the bitmask:
 ![bitmask reference](https://i.imgur.com/8Ogwgnf.png)
 More Info about autotileset creation in this video form HeartBeast: https://www.youtube.com/watch?v=uV5WKocIycY
 
-### license
+### License
+
 CC-0
 
 Based in https://github.com/lunarfyre7/GodotAutotileAssembler/ from https://github.com/lunarfyre7
