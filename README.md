@@ -105,7 +105,7 @@ Example:
 
 ### License
 
-CC-0
+MIT License
 
 Based in https://github.com/lunarfyre7/GodotAutotileAssembler/ from https://github.com/lunarfyre7
 
