@@ -23,15 +23,15 @@ The generator is fully customizable and automatically detects template rows as v
 
 Before you do anything you need to setup your art, the template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the default template sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
 
-Open a console inside the directory and run the `autotile_generator.py` python script with this format `python autotile_generator.py -i "input_image.png" -m "input_map.json" -d "output_image.png"`.
+Open a console inside the directory and run the `autotile_generator.py` python script with this format `autotile_generator -i "input_image.png" -m "input_map.json" -d "output_image.png"`.
 
 Example:
 
-`python autotile_generator.py -i "jungle.png"`
+`autotile_generator -i "jungle.png"`
 
-`python autotile_generator.py -i "cave.png" -d "cave_autotile.png"`
+`autotile_generator -i "cave.png" -d "cave_autotile.png"`
 
-`python autotile_generator.py -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+`autotile_generator -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
 
 
 Don't forget to use Quotation marks around your paths for space filename support.
@@ -72,7 +72,7 @@ Another important value from json map is the Input Size, which is how many tiles
 
 ###installation
 
-Simply run `sudo pip install .` from the root directory to install this package. Then you can invoke it anywhere like this `python -m autotile_generator -i <image>`.
+Simply run `sudo pip install .` from the root directory to install this package. Then you can invoke it anywhere like this `autotile_generator -i <image>`.
 
 **Usage in Godot**
 

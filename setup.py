@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     entry_points={
         'console_scripts': [
-            'my_project = my_project.__main__:main'
+            'autotile_generator = autotile_generator.autotile_generator:main'
         ]
     },
     name="autotile_generator",
@@ -25,4 +25,8 @@ setuptools.setup(
         "License :: Public Domain",
         "Operating System :: OS Independent",
     ),
+    install_requires=[
+        "pillow",
+        "jstyleson"
+    ]
 )
