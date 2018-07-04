@@ -15,59 +15,31 @@ To this:
 The generator is fully customizable and automatically detects template rows as variations and generate another set of tiles in the same result.
 
 ## Requirements
-
 * [Python 3.x](https://www.python.org/downloads/)
 * [Python Pillow library](https://pillow.readthedocs.io/en/5.1.x/installation.html) (pip install pillow)
 * [Python jstyleson library](https://github.com/linjackson78/jstyleson) (pip install jstyleson)
-
-## Installation
-
-Simply run `pip install .` from the root directory to install this package, don't forget administrator privileges. Then you can invoke it anywhere like this `python -m autotile_generator -s <image>`
-
-## Uninstall
-
-Run with administrator privileges `pip uninstall autotile_generator`
 
 ## Usage
 
 Before you do anything you need to setup your art, the template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the default template sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
 
-
-Open a console inside run the installed python script with this format
-`python -m autotile_generator -s "input_image.png" -i "input_map.json" -d "output_image.png"`.
+Open a console inside the directory and run the `autotile_generator.py` python script with this format `autotile_generator -i "input_image.png" -m "input_map.json" -d "output_image.png"`.
 
 Example:
 
-`python -m autotile_generator -s "jungle.png"`
+`autotile_generator -i "jungle.png"`
 
-`python -m autotile_generator -s "cave.png" -d "cave_autotile.png"`
+`autotile_generator -i "cave.png" -d "cave_autotile.png"`
 
-`python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+`autotile_generator -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+
 
 Don't forget to use Quotation marks around your paths for space filename support.
 
-If you don't want to install the package, open a console inside the directory and run the `autotile_generator.py` python script with this format `autotile_generator.py -s "input_image.png" -i "input_map.json" -d "output_image.png"`.
+### Command list:
+`-i --input`: The input image, if not found looks for template.png in the same directory.
 
-### Usage in Godot
-
-Add the generated autotile tileset sprite to your tileset scene, export it, and enable autotiling in the resource. Now open the template tileset in the inspector, look for the autotile tab and create the bitmask. Also you need to set the tile size in the autotile panel, the spacing to 0, and the bitmask mode to 3x3. 
-Here is an Reference for the bitmask:
-![bitmask reference](https://i.imgur.com/8Ogwgnf.png)
-More Info about autotileset creation in this video form HeartBeast: https://www.youtube.com/watch?v=uV5WKocIycY
-
-## Command list:
-
-`-s, --source or --source_image`: The input image, if not found looks for template.png in the same directory.
-
-Example:
-
-`python -m autotile_generator -s "jungle.png"`
-
-`-i --input_map`: The input mapping, if not found uses default installed map (default_input_map.json).
-
-Example:
-
-`python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
+`-m --input_map`: The input mapping, if not found looks for default_input_map.json in the same directory.
 
 Maps input tilesets to the generated autotile result image. 
 
@@ -96,19 +68,21 @@ Another important value from json map is the Input Size, which is how many tiles
 
 `-d --destination`: The output image destination, if not set the output is <inputfile>_autotile.png in the same directory as the input.
 
-Example:
-
-`python -m autotile_generator -s "cave.png" -d "cave_autotile.png"`
-
 `-h --help`: show help.
 
-Example:
+###installation
 
-`python -m autotile_generator -h`
+Simply run `sudo pip install .` from the root directory to install this package. Then you can invoke it anywhere like this `autotile_generator -i <image>`.
 
-### License
+**Usage in Godot**
 
-MIT License
+Add the generated autotile tileset sprite to your tileset scene, export it, and enable autotiling in the resource. Now open the template tileset in the inspector, look for the autotile tab and create the bitmask. Also you need to set the tile size in the autotile panel, the spacing to 0, and the bitmask mode to 3x3. 
+Here is an Reference for the bitmask:
+![bitmask reference](https://i.imgur.com/8Ogwgnf.png)
+More Info about autotileset creation in this video form HeartBeast: https://www.youtube.com/watch?v=uV5WKocIycY
+
+### license
+CC-0
 
 Based in https://github.com/lunarfyre7/GodotAutotileAssembler/ from https://github.com/lunarfyre7
 
