@@ -7,16 +7,16 @@
 #	pillow python library (pip install pillow)
 #	jstyleson library (pip install jstyleson)
 #Command examples:
-#	 python autotile_generator.py -i "jungle.png"
-#	 python autotile_generator.py -i "cave.png" -d "cave_autotile.png"
-#	 python autotile_generator.py -i "../input images/ice.png' -m "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"
+#	 python -m autotile_generator -s "jungle.png"
+#	 python -m autotile_generator -s "cave.png" -d "cave_autotile.png"
+#	 python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"
 #This is a fully configurable 3x3 autotile tilemap generator using only 5 tiles.
 #Before you do anything you need to setup your art, the default template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the template sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
 #The template and result map could be fully customized with commands.
 #Don't forget to use Quotation marks around your paths for space filename support.
 #Command list:
-#-i --input: The input image, if not found looks for template.png in the same directory.
-#-m --input_map: The input mapping, if not found looks for default_input_map.json in the same directory.
+#-s, --source or --source_image: The source image, if not found looks for template.png in the same directory.
+#-i, --input_map: The input mapping, if not found looks for default_input_map.json in the same directory.
 #	 Maps input tilesets to the generated autotile result image. 
 #	 Each tile in the result map is represented by 4 values: (number_1, number_2, number_3, number_4)
 #	 Where 0 represents an empty tile and a number bigger than 0 represents the tile in input tile, for example 1 is the first tile in input tile.
@@ -44,12 +44,11 @@ import re
 from PIL import Image, ImageDraw
 
 DEFAULT_INPUT_NAME = "template.png"
-# DEFAULT_INPUT_MAP_NAME = "default_input_map.json"
 DEFAULT_INPUT_MAP_NAME = pkg_resources.resource_filename('autotile_generator', 'default_input_map.json')
 DEFAULT_DEST_SUFFIX = "_autotile.png"
 
-COMMAND_INPUT = ["-i","--input","-input"]
-COMMAND_INPUT_MAP = ["-m","--input_map","-input_map"]
+COMMAND_SOURCE = ["-s","--source","-source","--source_image","-source_image"]
+COMMAND_INPUT_MAP = ["-i","--input_map","-input_map"]
 COMMAND_RESULT_PATH = ["-d","--destination","-destination"]
 COMMAND_HELP = ["-h","--help","-help"]
 
@@ -198,13 +197,13 @@ def dump_help():
 	print("Author: Hearto Lazor. Based in GodotAutotileAssembler from lunarfyre7")
 	print("Tool page: https://github.com/HeartoLazor/autotile_generator")
 	print("Command examples:")
-	print("\t python autotile_generator.py -i \"jungle.png\"")
-	print("\t python autotile_generator.py -i \"cave.png\" -d \"cave_autotile.png\"")
-	print("\t python autotile_generator.py -i \"../input images/ice.png\" -m \"../input maps/seven tile map.json\" -d \"../autotiles/ice_autotile.png\"")
+	print("\t python -m autotile_generator -s \"jungle.png\"")
+	print("\t python -m autotile_generator -s \"cave.png\" -d \"cave_autotile.png\"")
+	print("\t python -m autotile_generator -s \"../input images/ice.png\" -i \"../input maps/seven tile map.json\" -d \"../autotiles/ice_autotile.png\"")
 	print("Don't forget to use Quotation marks around your paths for space filename support.")
 	print("Command list:")
-	print("-i --input: The input image, if not found looks for template.png in the same directory.")
-	print("-m --input_map: The input mapping, if not found looks for default_input_map.json in the same directory.")
+	print("-s --input: The input image, if not found looks for template.png in the same directory.")
+	print("-i --input_map: The input mapping, if not found looks for default_input_map.json in the same directory.")
 	print("\t Maps input tilesets to the generated autotile result image. ")
 	print("\t Each tile in the result map is represented by 4 values: (number_1, number_2, number_3, number_4)")
 	print("\t Where 0 represents an empty tile and a number bigger than 0 represents the tile in input tile, for example 1 is the first tile in input tile.")
@@ -231,7 +230,7 @@ def main():
 	else:
 		#search input
 		input_path = DEFAULT_INPUT_NAME
-		result = read_command(COMMAND_INPUT, sys.argv)
+		result = read_command(COMMAND_SOURCE, sys.argv)
 		if(result != -1):
 			result = read_command_value(result, sys.argv)
 			if(result != None):
