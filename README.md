@@ -32,7 +32,8 @@ Run with administrator privileges `pip uninstall autotile_generator`
 
 Before you do anything you need to setup your art, the template is actually 20 tiles, but it's essentially the same amount of effort as making 5 tiles variants as long as you keep in mind that the tiles need to be cut into quarters easily. The structure of the default template sprite is seamless-fill, corners/single, vertical, horizontal and inner-corners. You can typically create the seamless fill tile and modify it for the other variants.
 
-Open a console and write a command like this: 
+
+Open a console inside run the installed python script with this format
 `python -m autotile_generator -s "input_image.png" -i "input_map.json" -d "output_image.png"`.
 
 Example:
@@ -44,6 +45,8 @@ Example:
 `python -m autotile_generator -s "../input images/ice.png' -i "../input maps/seven tile map.json" -d "../autotiles/ice_autotile.png"`
 
 Don't forget to use Quotation marks around your paths for space filename support.
+
+If you don't want to install the package, open a console inside the directory and run the `autotile_generator.py` python script with this format `autotile_generator.py -s "input_image.png" -i "input_map.json" -d "output_image.png"`.
 
 ### Usage in Godot
 

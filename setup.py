@@ -26,4 +26,8 @@ setuptools.setup(
         "License :: Public Domain",
         "Operating System :: OS Independent",
     ),
+    install_requires=[
+        "pillow",
+        "jstyleson"
+    ]
 )
