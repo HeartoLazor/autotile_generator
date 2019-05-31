@@ -52,57 +52,11 @@ COMMAND_INPUT_MAP = ["-i","--input_map","-input_map"]
 COMMAND_RESULT_PATH = ["-d","--destination","-destination"]
 COMMAND_HELP = ["-h","--help","-help"]
 
-def process_image(input_path, input_map_path, dest_path):
-	#Load input image
-	source = None
-	try:
-		source = Image.open(input_path)
-	except (FileNotFoundError, IOError, UnicodeDecodeError, SystemError) as err:
-	    print("Unable to load image: " + str(input_path) + "\n" + str(err))
-	    return
-	except:
-	    print("Unable to load image: " + str(input_path))
-	    return
-	if(source == None):
-		return
-	#load input map json
-	input_map = None
-	try:
-		result = open(input_map_path, 'r')
-		input_map = jstyleson.dispose(result)
-		input_map = jstyleson.loads(input_map)
-		result.close()
-	except (FileNotFoundError, IOError, UnicodeDecodeError, SystemError, json.JSONDecodeError) as err:
-	    print("Unable to load input json map: " + str(input_map_path) + "\n" + str(err))
-	    return
-	except:
-	    print("Unable to load input json map: " + str(input_map_path))
-	    return
-	#Extract json values
-	source_quantity = None
-	generator_map = None
-	if(input_map == None):
-		return
-	else:
-		if("input_size" in input_map):
-			try:
-				source_quantity = abs(int(input_map["input_size"]))
-			except:
-				source_quantity = None
-		if("input_map" in input_map):
-			generator_map = validate_generator_map(input_map["input_map"])
-	if(source_quantity == None or generator_map == None):
-		if(source_quantity == None):
-			print("input_size parameter invalid or not found in json file.")
-		if(generator_map == None):
-			print("input_map parameter invalid or not found in json file.")
-		return
-	#Process files and save
-	source = source.convert("RGBA")
+def create_autotile(generator_map, source_quantity, source):
 	tile_size = int(source.width / source_quantity)
-	tile_half_size = int(tile_size * 0.5)
 	tile_quantity = source_quantity
 	variation_quantity = math.floor(source.height / tile_size)
+	tile_half_size = int(tile_size * 0.5)
 	max_cell_len = 0
 	for cells in generator_map:
 		cell_len = len(cells)
@@ -110,7 +64,7 @@ def process_image(input_path, input_map_path, dest_path):
 			max_cell_len = cell_len
 	dest_tile_quantity = (max_cell_len, len(generator_map))
 	dest_tile_size = (dest_tile_quantity[0] * tile_size, dest_tile_quantity[1] * tile_size * variation_quantity)
-	dest = Image.new("RGBA", dest_tile_size)
+	image_result = Image.new("RGBA", dest_tile_size)
 	#image sections,  1 cell is composed of 4 portions of each tile, 
 	#where 0 = top left, 1 = top right, 2 = bot left and 3 = bot right. Those values are the ones used by generator_map
 	source_map = []
@@ -142,20 +96,84 @@ def process_image(input_path, input_map_path, dest_path):
 				r_cell = r_cells[y]
 				cell = r_cell[0]
 				if(cell > 0):
-					dest.paste(source_map[v][cell - 1][0], (y * tile_size, (x + v * generator_map_size) * tile_size))
+					image_result.paste(source_map[v][cell - 1][0], (y * tile_size, (x + v * generator_map_size) * tile_size))
 				cell = r_cell[1]
 				if(cell > 0):
-					dest.paste(source_map[v][cell - 1][1], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size))
+					image_result.paste(source_map[v][cell - 1][1], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size))
 				cell = r_cell[2]
 				if(cell > 0):
-					dest.paste(source_map[v][cell - 1][2], (y * tile_size,  (x + v * generator_map_size) * tile_size + tile_half_size))
+					image_result.paste(source_map[v][cell - 1][2], (y * tile_size,  (x + v * generator_map_size) * tile_size + tile_half_size))
 				cell = r_cell[3]
 				if(cell > 0):
-					dest.paste(source_map[v][cell - 1][3], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size + tile_half_size))
+					image_result.paste(source_map[v][cell - 1][3], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size + tile_half_size))
+	return image_result
+
+def process_image(input_path, input_map_path, dest_path):
+	#Load input image
+	source = None
+	try:
+		source = Image.open(input_path)
+	except (FileNotFoundError, IOError, UnicodeDecodeError, SystemError) as err:
+		print("Unable to load image: " + str(input_path) + "\n" + str(err))
+		return
+	except:
+		print("Unable to load image: " + str(input_path))
+		return
+	if(source == None):
+		return
+	source = source.convert("RGBA")
+	#load input map json
+	input_map = None
+	try:
+		result = open(input_map_path, 'r')
+		input_map = jstyleson.dispose(result)
+		input_map = jstyleson.loads(input_map)
+		result.close()
+	except (FileNotFoundError, IOError, UnicodeDecodeError, SystemError, json.JSONDecodeError) as err:
+		print("Unable to load input json map: " + str(input_map_path) + "\n" + str(err))
+		return
+	except:
+		print("Unable to load input json map: " + str(input_map_path))
+		return
+	#Extract json values
+	source_quantity = None
+	generator_map = None
+	generator_unique_map = None
+	if(input_map == None):
+		return
+	else:
+		if("input_size" in input_map):
+			try:
+				source_quantity = abs(int(input_map["input_size"]))
+			except:
+				source_quantity = None
+		if("input_map" in input_map):
+			generator_map = validate_generator_map(input_map["input_map"])
+		if("input_map_unique" in input_map):
+			generator_unique_map = validate_generator_map(input_map["input_map_unique"])
+	if(source_quantity == None or generator_map == None):
+		if(source_quantity == None):
+			print("input_size parameter invalid or not found in json file.")
+		if(generator_map == None):
+			print("input_map parameter invalid or not found in json file.")
+		return
+	#Process files and save
+	result = create_autotile(generator_map, source_quantity, source)
+	result_unique = None
+	if(generator_unique_map != None):
+		result_unique = create_autotile(generator_unique_map, source_quantity, source)
+	dest = result
+	if(result_unique != None):
+		combined_size = (max(result.size[0],result_unique.size[0]), result.size[1] + result_unique.size[1])
+		combined_image = Image.new("RGBA", combined_size)
+		combined_image.paste(result)
+		combined_image.paste(result_unique,(0, result.size[1]))
+		dest = combined_image
 	try:
 		dest.save(dest_path)
 	except (ValueError, IOError, SystemError) as err:
-	    print("Unable to save file: " + str(dest_path) + "\nCheck input_size in input map. Tile calculated size: " + str(tile_size) + "\n" + str(err))
+		print("Unable to save file: " + str(dest_path) + "\nCheck input_size in input map. Tile calculated size: " + str(tile_size) + "\n" + str(err))
+
 
 #return a ready to process generator map, return None in case of an invalid input map
 def validate_generator_map(json_map):
@@ -174,7 +192,7 @@ def validate_generator_map(json_map):
 						cells[j] = int(cells[j])
 			generator_map = g_map
 	except (ValueError) as err:
-	    print("Invalid tile map value: " + "\n" + str(err))
+		print("Invalid tile map value: " + "\n" + str(err))
 	except:
 		generator_map = None
 	if(generator_map != None):
