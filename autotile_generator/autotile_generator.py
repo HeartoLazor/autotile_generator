@@ -52,60 +52,103 @@ COMMAND_INPUT_MAP = ["-i","--input_map","-input_map"]
 COMMAND_RESULT_PATH = ["-d","--destination","-destination"]
 COMMAND_HELP = ["-h","--help","-help"]
 
-def create_autotile(generator_map, source_quantity, source):
-	tile_size = int(source.width / source_quantity)
-	tile_quantity = source_quantity
-	variation_quantity = math.floor(source.height / tile_size)
-	tile_half_size = int(tile_size * 0.5)
-	max_cell_len = 0
+def is_tile_empty(tile):
+	pixels = list(tile.getdata())
+	for pixel in pixels:
+		if(pixel[3] != 0):
+			return False
+	return True
+
+def create_autotile(generator_map, tile_size, source):
+	tile_half_size = { 'x':int(tile_size['x'] * 0.5),'y':int(tile_size['y'] * 0.5) }
+	source_quantity = { 'x':math.floor(source.width / tile_size['x']),'y':math.floor(source.height / tile_size['y']) } 
+	#image sections,  1 cell is composed of 4 portions of each tile, 
+	#where 0 = top left, 1 = top right, 2 = bot left and 3 = bot right. Those values are the ones used by generator_map and an empty cell = None
+	source_map = []
+	for x in range(0, source_quantity['x']):
+		variation = []
+		for y in range(0, source_quantity['y']):
+			p = {'x':x * tile_size['x'],'y':y * tile_size['y']}
+			if(is_tile_empty(source.crop((p['x'], p['y'], p['x'] + tile_size['x'], p['y'] + tile_size['y'])))):
+				variation.append(None)
+			else:
+				cell = []
+				pos_x = p['x']
+				pos_y = p['y']
+				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+				pos_x = p['x'] + tile_half_size['x']
+				pos_y = p['y']
+				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+				pos_x = p['x']
+				pos_y = p['y'] + tile_half_size['y']
+				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+				pos_x = p['x'] + tile_half_size['x']
+				pos_y = p['y'] + tile_half_size['y']
+				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+				variation.append(cell)
+		source_map.append(variation)
+
+	#Calculate result image size
+	result_size = {'x':0,'y':0}
 	for cells in generator_map:
 		cell_len = len(cells)
-		if(cell_len > max_cell_len):
-			max_cell_len = cell_len
-	dest_tile_quantity = (max_cell_len, len(generator_map))
-	dest_tile_size = (dest_tile_quantity[0] * tile_size, dest_tile_quantity[1] * tile_size * variation_quantity)
-	image_result = Image.new("RGBA", dest_tile_size)
-	#image sections,  1 cell is composed of 4 portions of each tile, 
-	#where 0 = top left, 1 = top right, 2 = bot left and 3 = bot right. Those values are the ones used by generator_map
-	source_map = []
-	for v in range(0, variation_quantity):
-		variation = []
-		for x in range(0, source.width , tile_size):
-			cell = []
-			pos_x = x
-			pos_y = v * tile_size
-			cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size, pos_y + tile_half_size)))
-			pos_x = x + tile_half_size
-			pos_y = v * tile_size
-			cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size, pos_y + tile_half_size)))
-			pos_x = x
-			pos_y = v * tile_size + tile_half_size
-			cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size, pos_y + tile_half_size)))
-			pos_x = x + tile_half_size
-			pos_y = v * tile_size + tile_half_size
-			cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size, pos_y + tile_half_size)))
-			variation.append(cell)
-		source_map.append(variation)
-	#create autotile image
-	generator_map_size = len(generator_map)
-	for v in range(0, variation_quantity):
-		for x in range(0, generator_map_size):
-			r_cells = generator_map[x]
-			r_cells_size = len(r_cells)
-			for y in range(0, r_cells_size):
-				r_cell = r_cells[y]
-				cell = r_cell[0]
-				if(cell > 0):
-					image_result.paste(source_map[v][cell - 1][0], (y * tile_size, (x + v * generator_map_size) * tile_size))
-				cell = r_cell[1]
-				if(cell > 0):
-					image_result.paste(source_map[v][cell - 1][1], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size))
-				cell = r_cell[2]
-				if(cell > 0):
-					image_result.paste(source_map[v][cell - 1][2], (y * tile_size,  (x + v * generator_map_size) * tile_size + tile_half_size))
-				cell = r_cell[3]
-				if(cell > 0):
-					image_result.paste(source_map[v][cell - 1][3], (y * tile_size + tile_half_size, (x + v * generator_map_size) * tile_size + tile_half_size))
+		if(cell_len > result_size['x']):
+			result_size['x'] = cell_len
+	result_size['x'] *= tile_size['x']
+	width = 0
+	for v_index in range(0, source_quantity['y']):
+		for i in range(0, len(generator_map)):
+			for j in range(0, len(generator_map[i])):
+				cells = generator_map[i][j]
+				skip = False
+				for cell in cells:
+					cell = cell - 1
+					if(source_map[cell][v_index] == None):
+						skip = True
+						break
+				if(not skip):
+					width += tile_size['x']
+				if(width >= result_size['x']):
+					result_size['y'] += tile_size['y']
+					width = 0
+	if(width > 0):
+		result_size['y'] += tile_size['y']
+	if(result_size['x'] <= 0 and result_size['y'] <= 0):
+		print("Empty image input.")
+		return None
+
+	#Render result image
+	image_result = Image.new("RGBA", (result_size['x'], result_size['y']))
+	width = 0
+	height = 0
+	for v_index in range(0, source_quantity['y']):
+		for i in range(0, len(generator_map)):
+			for j in range(0, len(generator_map[i])):
+				cells = generator_map[i][j]
+				skip = False
+				for cell in cells:
+					cell = cell - 1
+					if(source_map[cell][v_index] == None):
+						skip = True
+						break
+				if(not skip):
+					cell = cells[0]
+					if(cell > 0):
+						image_result.paste(source_map[cell - 1][v_index][0], (width, height))
+					cell = cells[1]
+					if(cell > 0):
+						image_result.paste(source_map[cell - 1][v_index][1], (width + tile_half_size['x'], height))
+					cell = cells[2]
+					if(cell > 0):
+						image_result.paste(source_map[cell - 1][v_index][2], (width, height + tile_half_size['y']))
+					cell = cells[3]
+					if(cell > 0):
+						image_result.paste(source_map[cell - 1][v_index][3], (width + tile_half_size['x'],  height + tile_half_size['y']))
+					width += tile_size['x']
+				if(width >= result_size['x']):
+					height += tile_size['y']
+					width = 0
+					
 	return image_result
 
 def process_image(input_path, input_map_path, dest_path):
@@ -136,44 +179,33 @@ def process_image(input_path, input_map_path, dest_path):
 		print("Unable to load input json map: " + str(input_map_path))
 		return
 	#Extract json values
-	source_quantity = None
+	tile_size = None
 	generator_map = None
-	generator_unique_map = None
 	if(input_map == None):
 		return
 	else:
 		if("input_size" in input_map):
+			print("input_size parameter is deprecated. Use instead: ""tile_width"":32,""tile_height"":32")
+		if("tile_width" in input_map and "tile_height" in input_map):
 			try:
-				source_quantity = abs(int(input_map["input_size"]))
+				tile_size = { 'x':abs(int(input_map["tile_width"])), 'y':abs(int(input_map["tile_height"])) }
 			except:
-				source_quantity = None
+				tile_size = None
 		if("input_map" in input_map):
 			generator_map = validate_generator_map(input_map["input_map"])
-		if("input_map_unique" in input_map):
-			generator_unique_map = validate_generator_map(input_map["input_map_unique"])
-	if(source_quantity == None or generator_map == None):
-		if(source_quantity == None):
-			print("input_size parameter invalid or not found in json file.")
+	if(tile_size == None or generator_map == None):
+		if(tile_size == None):
+			print("tile_width or tile_height parameter invalid or not found in json file.")
 		if(generator_map == None):
 			print("input_map parameter invalid or not found in json file.")
 		return
 	#Process files and save
-	result = create_autotile(generator_map, source_quantity, source)
-	result_unique = None
-	if(generator_unique_map != None):
-		result_unique = create_autotile(generator_unique_map, source_quantity, source)
-	dest = result
-	if(result_unique != None):
-		combined_size = (max(result.size[0],result_unique.size[0]), result.size[1] + result_unique.size[1])
-		combined_image = Image.new("RGBA", combined_size)
-		combined_image.paste(result)
-		combined_image.paste(result_unique,(0, result.size[1]))
-		dest = combined_image
-	try:
-		dest.save(dest_path)
-	except (ValueError, IOError, SystemError) as err:
-		print("Unable to save file: " + str(dest_path) + "\nCheck input_size in input map. Tile calculated size: " + str(tile_size) + "\n" + str(err))
-
+	result = create_autotile(generator_map, tile_size, source)
+	if(result != None):
+		try:
+			result.save(dest_path)
+		except (ValueError, IOError, SystemError) as err:
+			print("Unable to save file: " + str(dest_path) + "\nCheck tile_size in input map. Tile size: " + str(tile_size) + "\n" + str(err))
 
 #return a ready to process generator map, return None in case of an invalid input map
 def validate_generator_map(json_map):
