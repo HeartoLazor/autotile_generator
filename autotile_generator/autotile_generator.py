@@ -52,6 +52,20 @@ COMMAND_INPUT_MAP = ["-i","--input_map","-input_map"]
 COMMAND_RESULT_PATH = ["-d","--destination","-destination"]
 COMMAND_HELP = ["-h","--help","-help"]
 
+def draw_source_map(source_map, tile_size, save_path):
+	tile_half_size = { 'x':int(tile_size['x'] * 0.5),'y':int(tile_size['y'] * 0.5) }
+	image = Image.new("RGBA", (len(source_map) * tile_size['x'], len(source_map[0]) * tile_size['y']))
+	for i in range(0, len(source_map)):
+		for j in range(0, len(source_map[i])):
+			cell = source_map[i][j]
+			p = {'x':i * tile_size['x'],'y':j * tile_size['y']}
+			if(cell != None):
+				image.paste(cell[0], (p['x'], p['y']))
+				image.paste(cell[1], (p['x'] + tile_half_size['x'], p['y']))
+				image.paste(cell[2], (p['x'], p['y'] + tile_half_size['y']))
+				image.paste(cell[3], (p['x'] + tile_half_size['x'], p['y'] + tile_half_size['y']))
+	image.save(save_path)
+
 def is_tile_empty(tile):
 	pixels = list(tile.getdata())
 	for pixel in pixels:
@@ -59,7 +73,23 @@ def is_tile_empty(tile):
 			return False
 	return True
 
-def create_autotile(generator_map, tile_size, source):
+def create_cells(pos, tile_half_size, source):
+	cell = []
+	pos_x = pos['x']
+	pos_y = pos['y']
+	cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+	pos_x = pos['x'] + tile_half_size['x']
+	pos_y = pos['y']
+	cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+	pos_x = pos['x']
+	pos_y = pos['y'] + tile_half_size['y']
+	cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+	pos_x = pos['x'] + tile_half_size['x']
+	pos_y = pos['y'] + tile_half_size['y']
+	cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+	return cell
+
+def create_autotile(generator_map, tile_size, source, autocomplete):
 	tile_half_size = { 'x':int(tile_size['x'] * 0.5),'y':int(tile_size['y'] * 0.5) }
 	source_quantity = { 'x':math.floor(source.width / tile_size['x']),'y':math.floor(source.height / tile_size['y']) } 
 	#image sections,  1 cell is composed of 4 portions of each tile, 
@@ -70,22 +100,16 @@ def create_autotile(generator_map, tile_size, source):
 		for y in range(0, source_quantity['y']):
 			p = {'x':x * tile_size['x'],'y':y * tile_size['y']}
 			if(is_tile_empty(source.crop((p['x'], p['y'], p['x'] + tile_size['x'], p['y'] + tile_size['y'])))):
-				variation.append(None)
-			else:
-				cell = []
-				pos_x = p['x']
-				pos_y = p['y']
-				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
-				pos_x = p['x'] + tile_half_size['x']
-				pos_y = p['y']
-				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
-				pos_x = p['x']
-				pos_y = p['y'] + tile_half_size['y']
-				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
-				pos_x = p['x'] + tile_half_size['x']
-				pos_y = p['y'] + tile_half_size['y']
-				cell.append(source.crop((pos_x, pos_y, pos_x + tile_half_size['x'], pos_y + tile_half_size['y'])))
+				cell = None
+				if(autocomplete):
+					for sy in range(0, source_quantity['y']):
+						sp = {'x':x * tile_size['x'],'y':sy * tile_size['y']}
+						empty = is_tile_empty(source.crop((sp['x'], sp['y'], sp['x'] + tile_size['x'], sp['y'] + tile_size['y'])))
+						if(sy != y and not empty):
+							cell = create_cells(sp, tile_half_size, source)
 				variation.append(cell)
+			else:
+				variation.append(create_cells(p, tile_half_size, source))
 		source_map.append(variation)
 
 	#Calculate result image size
@@ -181,6 +205,7 @@ def process_image(input_path, input_map_path, dest_path):
 	#Extract json values
 	tile_size = None
 	generator_map = None
+	autocomplete = False
 	if(input_map == None):
 		return
 	else:
@@ -191,6 +216,8 @@ def process_image(input_path, input_map_path, dest_path):
 				tile_size = { 'x':abs(int(input_map["tile_width"])), 'y':abs(int(input_map["tile_height"])) }
 			except:
 				tile_size = None
+		if("autocomplete" in input_map):
+			autocomplete = bool(input_map["autocomplete"])
 		if("input_map" in input_map):
 			generator_map = validate_generator_map(input_map["input_map"])
 	if(tile_size == None or generator_map == None):
@@ -200,7 +227,7 @@ def process_image(input_path, input_map_path, dest_path):
 			print("input_map parameter invalid or not found in json file.")
 		return
 	#Process files and save
-	result = create_autotile(generator_map, tile_size, source)
+	result = create_autotile(generator_map, tile_size, source, autocomplete)
 	if(result != None):
 		try:
 			result.save(dest_path)

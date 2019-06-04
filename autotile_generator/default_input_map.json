@@ -12,6 +12,11 @@
 //	[4,4,1,1],[2,2,4,0],[4,4,4,4]
 //Result in an autotile image with 6 tiles
 
+//tile_width = width of each tile
+//tile_height = height of each tile
+//input_map = result tile map
+//autocomplete = optional parameter, true or false, if true try to autocomplete the result missing tilesets with the available ones
+
 //BLANK = 0
 //FILL = 1
 //CENTER = 2
